@@ -1,57 +1,96 @@
 ---
-title: "Severe Weather Events Report"
-output: pdf_document
+title: "Most Damaging Severe Weather Across USA"
+output: html_document
 ---
 
+#Synopsis
+By analysing the NOAA Storm database, and cleanning up the data extensively by removing inconsistencies, we have reached the following conclusions:
 
+  1-The most harmful severe weather to the human health is tornados
+  
+  2-The most damaging severe weather to human properties and to the crops is floods.
 
+#Preprocessing Data
 ##Loading required libraries
-```{r}
+```{r libraries loading}
 library(ggplot2)
+library(graphics)
+library(xtable)
 ```
 
-## Download the data
-```{r}
-#fileUrl = "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
-#download.file(fileUrl, destfile = "..//data//StormData.zip", method = "auto")
-#stordDataDownloaded = date()
+##Downloading the data
+```{r data downloading}
+fileUrl = "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+download.file(fileUrl, destfile = "..//data//repdata_data_StormData.csv.bz2", method = "auto")
+file.bz <- bzfile("..//data//repdata_data_StormData.csv.bz2","rt")  
+
+stormDataDownloaded = date()
 ```
 
-## Loading the data
+##Loading the data
 
-```{r}
-stormData = read.csv("..//data//repdata_data_StormData.csv", sep = ",")
+```{r data loading}
+#stormData = read.csv("..//data//repdata_data_StormData.csv", sep = ",")
+
+stormData = read.csv(file.bz)
 ```
 
-###Summary of Storm Data
-```{r}
-str(stormData)
+##Summary of Storm Data
+```{r data summary}
+summary(stormData)
 ```
 
-## Preprocessing the data
-```{r}
+#Data Processing
+```{r data processing}
+# Taking the sum of fatalities for each event type
 fatalities = tapply(stormData$FATALITIES, stormData$EVTYPE, sum)
+# Taking the sum of injuries for each event type
 injuries = tapply(stormData$INJURIES, stormData$EVTYPE, sum)
+# Taking the sum of property damage for each event type
 propertyDamage = tapply(stormData$PROPDMG, stormData$EVTYPE, sum)
+# Taking the sum of crop damage for each event type
 cropDamage = tapply(stormData$CROPDMG, stormData$EVTYPE, sum)
 
-consequences  = data.frame(dimnames(fatalities), injuries, fatalities, propertyDamage)
+#creating a new dataframe to store all economic and health damages for each type
+consequences = NULL
+consequences  = data.frame(event = dimnames(fatalities), injuries, fatalities, propertyDamage, cropDamage)
 
+names(consequences) = c("event", "injuries", "fatalities", "propertyDamage", "cropDamage")
+
+# A simple summation of all fatalities and injuries can be a measure of how harmful the event is
 consequences$health = consequences$injuries + consequences$fatalities
+
+healthPlot = ggplot(consequences, aes(x=event, y=health)) + geom_bar(stat="identity")
+
+healthPlot += 
+
+# A simple summation of all property and crop damages can be a measure of how damaging the event is
 consequences$economic = propertyDamage + cropDamage
 ```
 
-The most harmful weather with respect to population health:
+```{r}
+sortedHealth=consequences[order(consequences$health, decreasing = TRUE),c(1,2,3,6)]
+sortedEconomic=consequences[order(consequences$economic, decreasing = TRUE),c(1,4,5,7)]
+#sortedEconomic = sort()
+```
+
+#Results
+##The types of events that are most harmful to population health
 `r consequences[which(consequences$health == max(consequences$health)), 1]`
-Its harm can lead to a max of:
+###Its harm can lead to a max of:
 `r max(consequences$health) ` injuries and fatalities
 
-The most damaging weather events to the economy: `r consequences[which(consequences$economic == max(consequences$economic)), 1] `
-Its damage is maxed at: `r max(consequences$economic) `
+##The types of events that have the greatest economic consequences
+`r consequences[which(consequences$economic == max(consequences$economic)), 1] `
+###Its damage is maxed at: `r max(consequences$economic) `
+
+```{r table}
+#print(xtable(consequences), type="latex")
+
+```
 
 
-
-```{r, echo=FALSE}
+```{r figure, fig.width= 480, fig.height= 480, echo=FALSE}
 
 ```
 
