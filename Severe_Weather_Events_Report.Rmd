@@ -21,7 +21,7 @@ library(xtable)
 ##Downloading the data
 ```{r data downloading}
 fileUrl = "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
-download.file(fileUrl, destfile = "..//data//repdata_data_StormData.csv.bz2", method = "auto")
+#download.file(fileUrl, destfile = "..//data//repdata_data_StormData.csv.bz2", method = "auto")
 file.bz <- bzfile("..//data//repdata_data_StormData.csv.bz2","rt")  
 
 stormDataDownloaded = date()
@@ -62,7 +62,7 @@ consequences$health = consequences$injuries + consequences$fatalities
 
 healthPlot = ggplot(consequences, aes(x=event, y=health)) + geom_bar(stat="identity")
 
-healthPlot += 
+healthPlot
 
 # A simple summation of all property and crop damages can be a measure of how damaging the event is
 consequences$economic = propertyDamage + cropDamage

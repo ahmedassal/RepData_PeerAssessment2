@@ -57,9 +57,12 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="synopsis" class="section level1">
 <h1>Synopsis</h1>
+<p>By analysing the NOAA Storm database, and cleanning up the data extensively by removing inconsistencies, we have reached the following conclusions:</p>
+<p>1-The most harmful severe weather to the human health is tornados</p>
+<p>2-The most damaging severe weather to human properties and to the crops is floods.</p>
 </div>
-<div id="the-report" class="section level1">
-<h1>The Report</h1>
+<div id="preprocessing-data" class="section level1">
+<h1>Preprocessing Data</h1>
 <div id="loading-required-libraries" class="section level2">
 <h2>Loading required libraries</h2>
 <pre class="r"><code>library(ggplot2)
@@ -68,116 +71,122 @@ library(xtable)</code></pre>
 </div>
 <div id="downloading-the-data" class="section level2">
 <h2>Downloading the data</h2>
-<pre class="r"><code>#fileUrl = &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2&quot;
-#download.file(fileUrl, destfile = &quot;..//data//StormData.zip&quot;, method = &quot;auto&quot;)
+<pre class="r"><code>fileUrl = &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2&quot;
+#download.file(fileUrl, destfile = &quot;..//data//repdata_data_StormData.csv.bz2&quot;, method = &quot;auto&quot;)
+file.bz &lt;- bzfile(&quot;..//data//repdata_data_StormData.csv.bz2&quot;,&quot;rt&quot;)  
+
 stormDataDownloaded = date()</code></pre>
 </div>
 <div id="loading-the-data" class="section level2">
 <h2>Loading the data</h2>
-<pre class="r"><code>stormData = read.csv(&quot;..//data//repdata_data_StormData.csv&quot;, sep = &quot;,&quot;)</code></pre>
-<div id="summary-of-storm-data" class="section level3">
-<h3>Summary of Storm Data</h3>
+<pre class="r"><code>#stormData = read.csv(&quot;..//data//repdata_data_StormData.csv&quot;, sep = &quot;,&quot;)
+
+stormData = read.csv(file.bz)</code></pre>
+<pre><code>## Warning: EOF within quoted string</code></pre>
+</div>
+<div id="summary-of-storm-data" class="section level2">
+<h2>Summary of Storm Data</h2>
 <pre class="r"><code>summary(stormData)</code></pre>
-<pre><code>##     STATE__                  BGN_DATE             BGN_TIME     
-##  Min.   : 1.0   5/25/2011 0:00:00:  1202   12:00:00 AM: 10163  
-##  1st Qu.:19.0   4/27/2011 0:00:00:  1193   06:00:00 PM:  7350  
-##  Median :30.0   6/9/2011 0:00:00 :  1030   04:00:00 PM:  7261  
-##  Mean   :31.2   5/30/2004 0:00:00:  1016   05:00:00 PM:  6891  
-##  3rd Qu.:45.0   4/4/2011 0:00:00 :  1009   12:00:00 PM:  6703  
-##  Max.   :95.0   4/2/2006 0:00:00 :   981   03:00:00 PM:  6700  
-##                 (Other)          :895866   (Other)    :857229  
-##    TIME_ZONE          COUNTY         COUNTYNAME         STATE       
-##  CST    :547493   Min.   :  0   JEFFERSON :  7840   TX     : 83728  
-##  EST    :245558   1st Qu.: 31   WASHINGTON:  7603   KS     : 53440  
-##  MST    : 68390   Median : 75   JACKSON   :  6660   OK     : 46802  
-##  PST    : 28302   Mean   :101   FRANKLIN  :  6256   MO     : 35648  
-##  AST    :  6360   3rd Qu.:131   LINCOLN   :  5937   IA     : 31069  
-##  HST    :  2563   Max.   :873   MADISON   :  5632   NE     : 30271  
-##  (Other):  3631                 (Other)   :862369   (Other):621339  
-##                EVTYPE         BGN_RANGE       BGN_AZI      
-##  HAIL             :288661   Min.   :   0          :547332  
-##  TSTM WIND        :219940   1st Qu.:   0   N      : 86752  
-##  THUNDERSTORM WIND: 82563   Median :   0   W      : 38446  
-##  TORNADO          : 60652   Mean   :   1   S      : 37558  
-##  FLASH FLOOD      : 54277   3rd Qu.:   1   E      : 33178  
-##  FLOOD            : 25326   Max.   :3749   NW     : 24041  
-##  (Other)          :170878                  (Other):134990  
-##          BGN_LOCATI                  END_DATE             END_TIME     
-##               :287743                    :243411              :238978  
-##  COUNTYWIDE   : 19680   4/27/2011 0:00:00:  1214   06:00:00 PM:  9802  
-##  Countywide   :   993   5/25/2011 0:00:00:  1196   05:00:00 PM:  8314  
-##  SPRINGFIELD  :   843   6/9/2011 0:00:00 :  1021   04:00:00 PM:  8104  
-##  SOUTH PORTION:   810   4/4/2011 0:00:00 :  1007   12:00:00 PM:  7483  
-##  NORTH PORTION:   784   5/30/2004 0:00:00:   998   11:59:00 PM:  7184  
-##  (Other)      :591444   (Other)          :653450   (Other)    :622432  
-##    COUNTY_END COUNTYENDN       END_RANGE      END_AZI      
-##  Min.   :0    Mode:logical   Min.   :  0          :724837  
-##  1st Qu.:0    NA's:902297    1st Qu.:  0   N      : 28082  
-##  Median :0                   Median :  0   S      : 22510  
-##  Mean   :0                   Mean   :  1   W      : 20119  
-##  3rd Qu.:0                   3rd Qu.:  0   E      : 20047  
-##  Max.   :0                   Max.   :925   NE     : 14606  
-##                                            (Other): 72096  
-##            END_LOCATI         LENGTH           WIDTH            F         
-##                 :499225   Min.   :   0.0   Min.   :   0   Min.   :0       
-##  COUNTYWIDE     : 19731   1st Qu.:   0.0   1st Qu.:   0   1st Qu.:0       
-##  SOUTH PORTION  :   833   Median :   0.0   Median :   0   Median :1       
-##  NORTH PORTION  :   780   Mean   :   0.2   Mean   :   8   Mean   :1       
-##  CENTRAL PORTION:   617   3rd Qu.:   0.0   3rd Qu.:   0   3rd Qu.:1       
-##  SPRINGFIELD    :   575   Max.   :2315.0   Max.   :4400   Max.   :5       
-##  (Other)        :380536                                   NA's   :843563  
-##       MAG          FATALITIES     INJURIES         PROPDMG    
-##  Min.   :    0   Min.   :  0   Min.   :   0.0   Min.   :   0  
-##  1st Qu.:    0   1st Qu.:  0   1st Qu.:   0.0   1st Qu.:   0  
-##  Median :   50   Median :  0   Median :   0.0   Median :   0  
-##  Mean   :   47   Mean   :  0   Mean   :   0.2   Mean   :  12  
-##  3rd Qu.:   75   3rd Qu.:  0   3rd Qu.:   0.0   3rd Qu.:   0  
-##  Max.   :22000   Max.   :583   Max.   :1700.0   Max.   :5000  
+<pre><code>##     STATE__                  BGN_DATE         BGN_TIME      TIME_ZONE     
+##  Min.   : 1.0   4/9/1991 0:00:00 :   542   Min.   :   0   CST    :182982  
+##  1st Qu.:19.0   6/17/1992 0:00:00:   395   1st Qu.:1355   PST    :  6795  
+##  Median :29.0   4/3/1974 0:00:00 :   385   Median :1636   EST    :  1145  
+##  Mean   :29.8   6/20/1974 0:00:00:   384   Mean   :1538   MST    :  1096  
+##  3rd Qu.:42.0   7/7/1991 0:00:00 :   365   3rd Qu.:1900   AST    :   356  
+##  Max.   :72.0   4/5/1985 0:00:00 :   362   Max.   :2359   PDT    :    72  
+##                 (Other)          :190129                  (Other):   116  
+##      COUNTY         COUNTYNAME         STATE       
+##  Min.   :  0   JEFFERSON :  2331   TX     : 24087  
+##  1st Qu.: 37   JACKSON   :  1859   OK     : 14720  
+##  Median : 83   WASHINGTON:  1770   KS     : 11753  
+##  Mean   :104             :  1558   AR     :  8868  
+##  3rd Qu.:135   LINCOLN   :  1481   NE     :  8034  
+##  Max.   :840   MADISON   :  1432   MO     :  7622  
+##                (Other)   :182131   (Other):117478  
+##                 EVTYPE        BGN_RANGE        BGN_AZI      
+##  TSTM WIND         :90980   Min.   : 0.00          :191350  
+##  HAIL              :63417   1st Qu.: 0.00   N      :   228  
+##  TORNADO           :34920   Median : 0.00   W      :   203  
+##  THUNDERSTORM WINDS: 1843   Mean   : 0.04   S      :   190  
+##  HIGH WINDS        :  245   3rd Qu.: 0.00   E      :   147  
+##  FLASH FLOOD       :  235   Max.   :60.00   NE     :   111  
+##  (Other)           :  922                   (Other):   333  
+##        BGN_LOCATI                  END_DATE         END_TIME     
+##             :188170                    :192205          :192102  
+##  Little Rock:    57   6/10/1995 0:00:00:    16   1000CST:    12  
+##  Tucson     :    46   2/15/1995 0:00:00:     6   1600PST:    10  
+##  Phoenix    :    39   6/6/1995 0:00:00 :     6   2300CST:     8  
+##  Aleutians  :    35   5/26/1994 0:00:00:     5   0500MST:     7  
+##  Huntsville :    32   6/26/1994 0:00:00:     5   0930CST:     7  
+##  (Other)    :  4183   (Other)          :   319   (Other):   416  
+##    COUNTY_END COUNTYENDN       END_RANGE     END_AZI      
+##  Min.   :0    Mode:logical   Min.   : 0          :192510  
+##  1st Qu.:0    NA's:192562    1st Qu.: 0   N      :     9  
+##  Median :0                   Median : 0   E      :     7  
+##  Mean   :0                   Mean   : 0   NE     :     6  
+##  3rd Qu.:0                   3rd Qu.: 0   S      :     6  
+##  Max.   :0                   Max.   :60   NW     :     5  
+##                                           (Other):    19  
+##             END_LOCATI         LENGTH           WIDTH     
+##                  :192331   Min.   :  0.00   Min.   :   0  
+##  Alaska          :     9   1st Qu.:  0.00   1st Qu.:   0  
+##  Aleutians       :     5   Median :  0.00   Median :   0  
+##  Kodiak Island   :     5   Mean   :  0.65   Mean   :  18  
+##  Ak Peninsula    :     4   3rd Qu.:  0.00   3rd Qu.:   0  
+##  Alaska Peninsula:     4   Max.   :150.00   Max.   :3330  
+##  (Other)         :   204                                  
+##        F               MAG          FATALITIES        INJURIES     
+##  Min.   :0        Min.   :  0.0   Min.   :  0.00   Min.   :   0.0  
+##  1st Qu.:0        1st Qu.:  0.0   1st Qu.:  0.00   1st Qu.:   0.0  
+##  Median :1        Median :  0.0   Median :  0.00   Median :   0.0  
+##  Mean   :1        Mean   : 53.7   Mean   :  0.02   Mean   :   0.4  
+##  3rd Qu.:2        3rd Qu.: 75.0   3rd Qu.:  0.00   3rd Qu.:   0.0  
+##  Max.   :5        Max.   :999.0   Max.   :116.00   Max.   :1700.0  
+##  NA's   :159531                                                    
+##     PROPDMG      PROPDMGEXP        CROPDMG    CROPDMGEXP      WFO       
+##  Min.   :  0          :156012   Min.   :  0    :192488          :85864  
+##  1st Qu.:  0   K      : 33665   1st Qu.:  0   ?:     1   AT     :12212  
+##  Median :  0   M      :  2871   Median :  0   B:     1   ATA    : 9589  
+##  Mean   : 10   0      :     7   Mean   :  0   K:    39   T      : 7166  
+##  3rd Qu.:  0   +      :     3   3rd Qu.:  0   m:     1   OKC    : 5359  
+##  Max.   :900   B      :     2   Max.   :500   M:    32   NG     : 5276  
+##                (Other):     2                            (Other):67096  
+##  STATEOFFIC    
+##  Mode:logical  
+##  NA's:192562   
+##                
+##                
+##                
+##                
+##                
+##                                                                                                                              ZONENAMES     
+##                                                                                                                                   :192093  
+##  EASTERN BARANOF ISLAND AND SOU - EASTERN BARANOF ISLAND AND SOU                                                                  :   131  
+##  HOUSTON - HOUSTON                                                                                                                :    56  
+##  EASTERN BARANOF ISLAND AND SOU - EASTERN BARANOF ISLAND AND SOU - EASTERN BARANOF ISLAND AND SOU - EASTERN BARANOF ISLAND AND SOU:    37  
+##  EASTERN BARANOF ISLAND AND SOU - EASTERN BARANOF ISLAND AND SOU - EASTERN BARANOF ISLAND AND SOU                                 :    32  
+##  HOUSTON - HOUSTON - HOUSTON - HOUSTON - HOUSTON - HOUSTON                                                                        :    12  
+##  (Other)                                                                                                                          :   201  
+##     LATITUDE      LONGITUDE       LATITUDE_E     LONGITUDE_   
+##  Min.   :   0   Min.   :    0   Min.   :   0   Min.   :    0  
+##  1st Qu.:3334   1st Qu.: 8454   1st Qu.:   0   1st Qu.:    0  
+##  Median :3718   Median : 9247   Median :   0   Median :    0  
+##  Mean   :3644   Mean   : 8940   Mean   : 221   Mean   :  542  
+##  3rd Qu.:4107   3rd Qu.: 9745   3rd Qu.:   0   3rd Qu.:    0  
+##  Max.   :5273   Max.   :15941   Max.   :4902   Max.   :12256  
 ##                                                               
-##    PROPDMGEXP        CROPDMG        CROPDMGEXP          WFO        
-##         :465934   Min.   :  0.0          :618413          :142069  
-##  K      :424665   1st Qu.:  0.0   K      :281832   OUN    : 17393  
-##  M      : 11330   Median :  0.0   M      :  1994   JAN    : 13889  
-##  0      :   216   Mean   :  1.5   k      :    21   LWX    : 13174  
-##  B      :    40   3rd Qu.:  0.0   0      :    19   PHI    : 12551  
-##  5      :    28   Max.   :990.0   B      :     9   TSA    : 12483  
-##  (Other):    84                   (Other):     9   (Other):690738  
-##                                STATEOFFIC    
-##                                     :248769  
-##  TEXAS, North                       : 12193  
-##  ARKANSAS, Central and North Central: 11738  
-##  IOWA, Central                      : 11345  
-##  KANSAS, Southwest                  : 11212  
-##  GEORGIA, North and Central         : 11120  
-##  (Other)                            :595920  
-##                                                                                                                                                                                                     ZONENAMES     
-##                                                                                                                                                                                                          :594029  
-##                                                                                                                                                                                                          :205988  
-##  GREATER RENO / CARSON CITY / M - GREATER RENO / CARSON CITY / M                                                                                                                                         :   639  
-##  GREATER LAKE TAHOE AREA - GREATER LAKE TAHOE AREA                                                                                                                                                       :   592  
-##  JEFFERSON - JEFFERSON                                                                                                                                                                                   :   303  
-##  MADISON - MADISON                                                                                                                                                                                       :   302  
-##  (Other)                                                                                                                                                                                                 :100444  
-##     LATITUDE      LONGITUDE        LATITUDE_E     LONGITUDE_    
-##  Min.   :   0   Min.   :-14451   Min.   :   0   Min.   :-14455  
-##  1st Qu.:2802   1st Qu.:  7247   1st Qu.:   0   1st Qu.:     0  
-##  Median :3540   Median :  8707   Median :   0   Median :     0  
-##  Mean   :2875   Mean   :  6940   Mean   :1452   Mean   :  3509  
-##  3rd Qu.:4019   3rd Qu.:  9605   3rd Qu.:3549   3rd Qu.:  8735  
-##  Max.   :9706   Max.   : 17124   Max.   :9706   Max.   :106220  
-##  NA's   :47                      NA's   :40                     
-##                                            REMARKS           REFNUM      
-##                                                :287433   Min.   :     1  
-##                                                : 24013   1st Qu.:225575  
-##  Trees down.\n                                 :  1110   Median :451149  
-##  Several trees were blown down.\n              :   569   Mean   :451149  
-##  Trees were downed.\n                          :   446   3rd Qu.:676723  
-##  Large trees and power lines were blown down.\n:   432   Max.   :902297  
-##  (Other)                                       :588294</code></pre>
+##                                       REMARKS           REFNUM      
+##                                           :187563   Min.   :     1  
+##                                           :  1139   1st Qu.: 48141  
+##  Thunderstorm winds downed some trees.    :    72   Median : 96281  
+##  Thunderstorm winds downed several trees. :    48   Mean   : 96281  
+##  Several trees were blown down.           :    41   3rd Qu.:144421  
+##  Thunderstorm winds downed a few trees.   :    35   Max.   :193320  
+##  (Other)                                  :  3664   NA's   :1</code></pre>
 </div>
 </div>
-<div id="data-processing" class="section level2">
-<h2>Data Processing</h2>
+<div id="data-processing" class="section level1">
+<h1>Data Processing</h1>
 <pre class="r"><code># Taking the sum of fatalities for each event type
 fatalities = tapply(stormData$FATALITIES, stormData$EVTYPE, sum)
 # Taking the sum of injuries for each event type
@@ -188,27 +197,35 @@ propertyDamage = tapply(stormData$PROPDMG, stormData$EVTYPE, sum)
 cropDamage = tapply(stormData$CROPDMG, stormData$EVTYPE, sum)
 
 #creating a new dataframe to store all economic and health damages for each type
-consequences  = data.frame(dimnames(fatalities), injuries, fatalities, propertyDamage, cropDamage)
+consequences = NULL
+consequences  = data.frame(event = dimnames(fatalities), injuries, fatalities, propertyDamage, cropDamage)
+
+names(consequences) = c(&quot;event&quot;, &quot;injuries&quot;, &quot;fatalities&quot;, &quot;propertyDamage&quot;, &quot;cropDamage&quot;)
 
 # A simple summation of all fatalities and injuries can be a measure of how harmful the event is
 consequences$health = consequences$injuries + consequences$fatalities
-# A simple summation of all property and crop damages can be a measure of how damaging the event is
+
+healthPlot = ggplot(consequences, aes(x=event, y=health)) + geom_bar(stat=&quot;identity&quot;)
+
+healthPlot</code></pre>
+<pre><code>## Warning: position_stack requires constant width: output may be incorrect</code></pre>
+<p><img src="data:image/png;base64,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" title="plot of chunk data processing" alt="plot of chunk data processing" width="672" /></p>
+<pre class="r"><code># A simple summation of all property and crop damages can be a measure of how damaging the event is
 consequences$economic = propertyDamage + cropDamage</code></pre>
 <pre class="r"><code>sortedHealth=consequences[order(consequences$health, decreasing = TRUE),c(1,2,3,6)]
 sortedEconomic=consequences[order(consequences$economic, decreasing = TRUE),c(1,4,5,7)]
 #sortedEconomic = sort()</code></pre>
 </div>
-<div id="results" class="section level2">
-<h2>Results</h2>
-<div id="the-types-of-events-that-are-most-harmful-to-population-health" class="section level3">
-<h3>The types of events that are most harmful to population health</h3>
-<p>TORNADO ####Its harm can lead to a max of: 9.6979 × 10<sup>4</sup> injuries and fatalities</p>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<div id="the-types-of-events-that-are-most-harmful-to-population-health" class="section level2">
+<h2>The types of events that are most harmful to population health</h2>
+<p>TORNADO ###Its harm can lead to a max of: 7.26 × 10<sup>4</sup> injuries and fatalities</p>
 </div>
-<div id="the-types-of-events-that-have-the-greatest-economic-consequences" class="section level3">
-<h3>The types of events that have the greatest economic consequences</h3>
-<p>TORNADO ####Its damage is maxed at: 3.3123 × 10<sup>6</sup></p>
+<div id="the-types-of-events-that-have-the-greatest-economic-consequences" class="section level2">
+<h2>The types of events that have the greatest economic consequences</h2>
+<p>TORNADO ###Its damage is maxed at: 1.841 × 10<sup>6</sup></p>
 <pre class="r"><code>#print(xtable(consequences), type=&quot;latex&quot;)</code></pre>
-</div>
 </div>
 </div>
 
