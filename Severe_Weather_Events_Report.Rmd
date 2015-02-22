@@ -1,6 +1,6 @@
 ---
-title: "Most Damaging Severe Weather Across USA"
-output: html_document
+title: "Most Damaging Severe Weather Across USA v2"
+output: pdf_document
 ---
 
 #Synopsis
@@ -22,7 +22,7 @@ library(xtable)
 ```{r data downloading}
 fileUrl = "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
 #download.file(fileUrl, destfile = "..//data//repdata_data_StormData.csv.bz2", method = "auto")
-file.bz <- bzfile("..//data//repdata_data_StormData.csv.bz2","rt")  
+file.bz <- bzfile("..//data//StormData.zip","rt")  
 
 stormDataDownloaded = date()
 ```
@@ -81,7 +81,7 @@ sortedEconomic=consequences[order(consequences$economic, decreasing = TRUE),c(1,
 `r max(consequences$health) ` injuries and fatalities
 
 ##The types of events that have the greatest economic consequences
-`r consequences[which(consequences$economic == max(consequences$economic)), 1] `
+`r consequences[which(consequences$economic == max(consequences$economic)), 1]`
 ###Its damage is maxed at: `r max(consequences$economic) `
 
 ```{r table}
